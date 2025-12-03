@@ -169,7 +169,7 @@ fi
 # 安装其他依赖（忽略版本要求）
 echo ""
 echo -e "${YELLOW}  → 安装其他依赖...${NC}"
-pip3 install cloudscraper impacket psutil pycryptodome pysocks requests 2>&1 | grep -E "(Successfully|already)" | head -5
+pip3 install cloudscraper impacket psutil pycryptodome pysocks requests icmplib 2>&1 | grep -E "(Successfully|already)" | head -10
 
 echo ""
 echo -e "${GREEN}✓ MHDDoS 安装完成${NC}"
