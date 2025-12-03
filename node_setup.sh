@@ -147,33 +147,29 @@ fi
 echo -e "${YELLOW}  → 安装 Python 依赖（这可能需要几分钟）...${NC}"
 echo ""
 
-# 第一次安装
-pip3 install -r requirements.txt 2>&1 | grep -E "(Successfully|Requirement|ERROR)" || true
+# 先安装基础依赖（跳过版本冲突的包）
+echo -e "${YELLOW}  → 安装基础依赖...${NC}"
+pip3 install yarl certifi PySocks aiohttp aiohttp_socks requests 2>&1 | grep -E "(Successfully|already)" | head -5
 
+# 从 GitHub 安装 PyRoxy（正确的方式）
 echo ""
-echo -e "${YELLOW}  → 验证关键依赖...${NC}"
+echo -e "${YELLOW}  → 从 GitHub 安装 PyRoxy...${NC}"
+pip3 install git+https://github.com/MHProDev/PyRoxy.git 2>&1 | tail -3
 
-# 验证并重试
-retry_count=0
-max_retries=3
-
-while [ $retry_count -lt $max_retries ]; do
-    if python3 -c "import PyRoxy" 2>/dev/null; then
-        echo -e "${GREEN}  ✓ PyRoxy 已安装${NC}"
-        break
-    else
-        retry_count=$((retry_count + 1))
-        echo -e "${YELLOW}  ⚠ PyRoxy 未安装，重试 $retry_count/$max_retries...${NC}"
-        pip3 install PyRoxy --force-reinstall 2>&1 | tail -3
-    fi
-done
-
-# 最终验证
-if ! python3 -c "import PyRoxy" 2>/dev/null; then
-    echo -e "${RED}  ✗ 依赖安装失败，尝试手动安装...${NC}"
-    pip3 install yarl certifi PySocks aiohttp aiohttp_socks requests 2>&1 | tail -5
-    pip3 install PyRoxy --no-deps --force-reinstall 2>&1 | tail -3
+# 验证安装
+echo ""
+echo -e "${YELLOW}  → 验证依赖...${NC}"
+if python3 -c "import PyRoxy" 2>/dev/null; then
+    echo -e "${GREEN}  ✓ PyRoxy 已成功安装${NC}"
+else
+    echo -e "${RED}  ✗ PyRoxy 安装失败，尝试备用方法...${NC}"
+    pip3 install PyRoxy --force-reinstall 2>&1 | tail -3
 fi
+
+# 安装其他依赖（忽略版本要求）
+echo ""
+echo -e "${YELLOW}  → 安装其他依赖...${NC}"
+pip3 install cloudscraper impacket psutil pycryptodome pysocks requests 2>&1 | grep -E "(Successfully|already)" | head -5
 
 echo ""
 echo -e "${GREEN}✓ MHDDoS 安装完成${NC}"
