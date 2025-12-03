@@ -144,16 +144,38 @@ else
 fi
 
 # 安装依赖
-echo -e "${YELLOW}  → 安装 Python 依赖...${NC}"
-pip3 install -r requirements.txt
+echo -e "${YELLOW}  → 安装 Python 依赖（这可能需要几分钟）...${NC}"
+echo ""
 
-# 验证关键依赖
+# 第一次安装
+pip3 install -r requirements.txt 2>&1 | grep -E "(Successfully|Requirement|ERROR)" || true
+
+echo ""
+echo -e "${YELLOW}  → 验证关键依赖...${NC}"
+
+# 验证并重试
+retry_count=0
+max_retries=3
+
+while [ $retry_count -lt $max_retries ]; do
+    if python3 -c "import PyRoxy" 2>/dev/null; then
+        echo -e "${GREEN}  ✓ PyRoxy 已安装${NC}"
+        break
+    else
+        retry_count=$((retry_count + 1))
+        echo -e "${YELLOW}  ⚠ PyRoxy 未安装，重试 $retry_count/$max_retries...${NC}"
+        pip3 install PyRoxy --force-reinstall 2>&1 | tail -3
+    fi
+done
+
+# 最终验证
 if ! python3 -c "import PyRoxy" 2>/dev/null; then
-    echo -e "${YELLOW}  → 重新安装依赖...${NC}"
-    pip3 install --upgrade pip
-    pip3 install -r requirements.txt --force-reinstall
+    echo -e "${RED}  ✗ 依赖安装失败，尝试手动安装...${NC}"
+    pip3 install yarl certifi PySocks aiohttp aiohttp_socks requests 2>&1 | tail -5
+    pip3 install PyRoxy --no-deps --force-reinstall 2>&1 | tail -3
 fi
 
+echo ""
 echo -e "${GREEN}✓ MHDDoS 安装完成${NC}"
 echo ""
 
