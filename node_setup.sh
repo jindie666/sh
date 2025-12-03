@@ -145,7 +145,14 @@ fi
 
 # 安装依赖
 echo -e "${YELLOW}  → 安装 Python 依赖...${NC}"
-pip3 install -r requirements.txt -q 2>/dev/null
+pip3 install -r requirements.txt
+
+# 验证关键依赖
+if ! python3 -c "import PyRoxy" 2>/dev/null; then
+    echo -e "${YELLOW}  → 重新安装依赖...${NC}"
+    pip3 install --upgrade pip
+    pip3 install -r requirements.txt --force-reinstall
+fi
 
 echo -e "${GREEN}✓ MHDDoS 安装完成${NC}"
 echo ""
