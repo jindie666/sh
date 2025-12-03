@@ -147,29 +147,36 @@ fi
 echo -e "${YELLOW}  → 安装 Python 依赖（这可能需要几分钟）...${NC}"
 echo ""
 
-# 先安装基础依赖（跳过版本冲突的包）
-echo -e "${YELLOW}  → 安装基础依赖...${NC}"
-pip3 install yarl certifi PySocks aiohttp aiohttp_socks requests 2>&1 | grep -E "(Successfully|already)" | head -5
+# 完整的依赖列表（MHDDoS 所有需要的包）
+echo -e "${YELLOW}  → 安装所有依赖包...${NC}"
+pip3 install --upgrade \
+    yarl \
+    certifi \
+    PySocks \
+    aiohttp \
+    aiohttp-socks \
+    requests \
+    cloudscraper \
+    impacket \
+    psutil \
+    pycryptodome \
+    icmplib \
+    cfscrape \
+    pyOpenSSL \
+    brotli \
+    urllib3 2>&1 | grep -E "(Successfully|Requirement)" | tail -15
 
-# 从 GitHub 安装 PyRoxy（正确的方式）
+# 从 GitHub 安装 PyRoxy（必须的）
 echo ""
-echo -e "${YELLOW}  → 从 GitHub 安装 PyRoxy...${NC}"
-pip3 install git+https://github.com/MHProDev/PyRoxy.git 2>&1 | tail -3
+echo -e "${YELLOW}  → 安装 PyRoxy...${NC}"
+pip3 install git+https://github.com/MHProDev/PyRoxy.git 2>&1 | tail -2
 
-# 验证安装
+# 验证关键依赖
 echo ""
-echo -e "${YELLOW}  → 验证依赖...${NC}"
-if python3 -c "import PyRoxy" 2>/dev/null; then
-    echo -e "${GREEN}  ✓ PyRoxy 已成功安装${NC}"
-else
-    echo -e "${RED}  ✗ PyRoxy 安装失败，尝试备用方法...${NC}"
-    pip3 install PyRoxy --force-reinstall 2>&1 | tail -3
-fi
-
-# 安装其他依赖（忽略版本要求）
-echo ""
-echo -e "${YELLOW}  → 安装其他依赖...${NC}"
-pip3 install cloudscraper impacket psutil pycryptodome pysocks requests icmplib 2>&1 | grep -E "(Successfully|already)" | head -10
+echo -e "${YELLOW}  → 验证关键依赖...${NC}"
+python3 -c "import PyRoxy" 2>/dev/null && echo -e "${GREEN}  ✓ PyRoxy${NC}" || echo -e "${RED}  ✗ PyRoxy${NC}"
+python3 -c "import icmplib" 2>/dev/null && echo -e "${GREEN}  ✓ icmplib${NC}" || echo -e "${RED}  ✗ icmplib${NC}"
+python3 -c "import aiohttp" 2>/dev/null && echo -e "${GREEN}  ✓ aiohttp${NC}" || echo -e "${RED}  ✗ aiohttp${NC}"
 
 echo ""
 echo -e "${GREEN}✓ MHDDoS 安装完成${NC}"
